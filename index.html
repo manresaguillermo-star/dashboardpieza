@@ -9,209 +9,446 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0d0d0d;
-      --surface: #161616;
-      --accent: #22c55e;
-      --accent-dim: #16a34a;
-      --muted: #6b7280;
-      --text: #f9fafb;
-      --text-sub: #9ca3af;
-      --pulse-ring: rgba(34,197,94,0.35);
+      --bg:        #070a0f;
+      --line:      #1a2232;
+      --accent:    #00dfa2;
+      --accent-lo: rgba(0,223,162,0.12);
+      --text:      #c8d6e5;
+      --text-sub:  #4e6278;
+      --text-dim:  #2a3a4e;
+      --sun:       #f5a623;
+      --rain:      #5b9bd5;
+      --pulse-ring: rgba(0,223,162,0.3);
     }
 
     html, body {
       height: 100%;
       background: var(--bg);
       color: var(--text);
-      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 0;
       overflow: hidden;
+      user-select: none;
     }
 
-    .card {
-      background: var(--surface);
-      border: 1px solid #222;
-      border-radius: 2rem;
-      padding: 4rem 6rem;
+    /* ── TOP BAR ── */
+    .topbar {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 1.5rem;
-      min-width: 420px;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+      justify-content: space-between;
+      padding: 1.4rem 2.4rem;
+      border-bottom: 1px solid var(--line);
+      flex-shrink: 0;
     }
 
-    .label {
+    .topbar-date {
       font-size: 1rem;
-      font-weight: 600;
-      letter-spacing: 0.2em;
+      font-weight: 500;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
       color: var(--text-sub);
     }
 
-    .counter-wrap {
-      position: relative;
+    .topbar-time {
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      font-variant-numeric: tabular-nums;
+      font-family: 'Courier New', 'Consolas', monospace;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    /* ── CENTER (counter) ── */
+    .center {
+      flex: 1;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      gap: 1.2rem;
+      padding: 2rem;
+      position: relative;
+    }
+
+    .counter-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--text-sub);
     }
 
     .counter {
-      font-size: clamp(6rem, 18vw, 12rem);
-      font-weight: 800;
+      font-size: clamp(7rem, 22vw, 14rem);
+      font-weight: 900;
+      font-stretch: condensed;
       font-variant-numeric: tabular-nums;
+      line-height: 0.9;
       color: var(--accent);
-      line-height: 1;
-      transition: transform 0.15s ease, opacity 0.15s ease;
+      transition: transform 0.12s ease, opacity 0.12s ease;
+      /* condensed effect via transform on browsers without font-stretch support */
+      font-family: 'Arial Narrow', 'Helvetica Neue Condensed', 'Segoe UI', Arial, sans-serif;
     }
 
     .counter.bump {
-      transform: scale(1.08);
-      opacity: 0.85;
+      transform: scale(1.06);
+      opacity: 0.8;
+    }
+
+    .last-order {
+      font-size: 0.85rem;
+      letter-spacing: 0.12em;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      min-height: 1.2em;
     }
 
     .status-row {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      font-size: 0.8rem;
-      color: var(--muted);
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-top: 0.4rem;
     }
 
     .dot {
-      width: 8px;
-      height: 8px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
-      background: var(--muted);
+      background: var(--text-dim);
       flex-shrink: 0;
     }
 
     .dot.live {
       background: var(--accent);
-      animation: pulse 2s infinite;
+      animation: pulse 2.5s infinite;
     }
 
     @keyframes pulse {
       0%, 100% { box-shadow: 0 0 0 0 var(--pulse-ring); }
-      50%       { box-shadow: 0 0 0 6px transparent; }
+      50%       { box-shadow: 0 0 0 5px transparent; }
     }
 
-    .last-order {
-      font-size: 0.75rem;
-      color: var(--muted);
-      min-height: 1.1em;
-    }
-
-    /* flash overlay on new sale */
+    /* flash overlay */
     .flash {
       position: fixed;
       inset: 0;
       background: var(--accent);
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.1s ease;
+      transition: opacity 0.08s ease;
       z-index: 10;
     }
-    .flash.show { opacity: 0.07; }
+    .flash.show { opacity: 0.06; }
+
+    /* ── WEATHER STRIP ── */
+    .weather {
+      border-top: 1px solid var(--line);
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      flex-shrink: 0;
+    }
+
+    .weather-day {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      padding: 1.4rem 1rem;
+      position: relative;
+    }
+
+    .weather-day + .weather-day::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 20%;
+      height: 60%;
+      width: 1px;
+      background: var(--line);
+    }
+
+    .weather-day-name {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+    }
+
+    .weather-icon {
+      font-size: 2rem;
+      line-height: 1;
+    }
+
+    .weather-temp {
+      display: flex;
+      gap: 0.7rem;
+      align-items: baseline;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .weather-temp-max {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .weather-temp-min {
+      font-size: 1rem;
+      font-weight: 400;
+      color: var(--text-sub);
+    }
+
+    .weather-desc {
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+    }
+
+    /* loading state */
+    .weather-loading {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 1.8rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
   </style>
 </head>
 <body>
   <div class="flash" id="flash"></div>
 
-  <div class="card">
-    <div class="label">Ventas totales</div>
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar-date" id="clock-date">—</div>
+    <div class="topbar-time" id="clock-time">--:--:--</div>
+  </header>
 
-    <div class="counter-wrap">
-      <div class="counter" id="counter">—</div>
-    </div>
-
+  <!-- COUNTER -->
+  <main class="center">
+    <div class="counter-label">Ventas totales</div>
+    <div class="counter" id="counter">—</div>
     <div class="last-order" id="last-order"></div>
-
     <div class="status-row">
       <div class="dot" id="dot"></div>
       <span id="status-text">Conectando…</span>
     </div>
-  </div>
+  </main>
+
+  <!-- WEATHER -->
+  <footer class="weather" id="weather">
+    <div class="weather-loading" id="weather-loading">Cargando clima…</div>
+  </footer>
 
   <script>
-    const SUPABASE_URL = "https://vvcthfxbksbmzjztkymo.supabase.co";
+    /* ═══════════════════════════════════════
+       CONFIGURACIÓN
+    ═══════════════════════════════════════ */
+    const SUPABASE_URL      = "https://vvcthfxbksbmzjztkymo.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2Y3RoZnhia3NibXpqenRreW1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3ODc3MzgsImV4cCI6MjEwMTM2MzczOH0.e_rBWBTJutKHmmKssuMPLJuj-jof7JeHvLgvkM-ziX8";
-    // Ventas registradas antes de conectar Empretienda
-    const SALES_OFFSET = 1571;
+    const SALES_OFFSET      = 1571;   // ventas previas a Empretienda
+    const POLL_INTERVAL     = 30_000; // ms entre polls (fallback)
+    const RT_TIMEOUT        = 10_000; // ms antes de caer a polling
+    const WEATHER_INTERVAL  = 30 * 60 * 1000; // refrescar clima cada 30 min
 
+    /* ═══════════════════════════════════════
+       RELOJ
+    ═══════════════════════════════════════ */
+    const DIAS   = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    const MESES  = ['enero','febrero','marzo','abril','mayo','junio',
+                    'julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+    function tickClock() {
+      const now  = new Date();
+      const hh   = String(now.getHours()).padStart(2,'0');
+      const mm   = String(now.getMinutes()).padStart(2,'0');
+      const ss   = String(now.getSeconds()).padStart(2,'0');
+      document.getElementById('clock-time').textContent = `${hh}:${mm}:${ss}`;
+      document.getElementById('clock-date').textContent =
+        `${DIAS[now.getDay()]}, ${now.getDate()} de ${MESES[now.getMonth()]}`;
+    }
+    tickClock();
+    setInterval(tickClock, 1000);
+
+    /* ═══════════════════════════════════════
+       CLIMA — Open-Meteo (sin API key)
+    ═══════════════════════════════════════ */
+    function wmoToInfo(code) {
+      if (code === 0)                        return { icon: '☀️',  desc: 'Despejado',   color: 'var(--sun)' };
+      if (code === 1)                        return { icon: '🌤️', desc: 'Casi despej.', color: 'var(--sun)' };
+      if (code === 2)                        return { icon: '⛅',  desc: 'Parcial',      color: 'var(--text)' };
+      if (code === 3)                        return { icon: '☁️',  desc: 'Nublado',      color: 'var(--text-sub)' };
+      if ([45,48].includes(code))            return { icon: '🌫️', desc: 'Niebla',       color: 'var(--text-sub)' };
+      if ([51,53,55].includes(code))         return { icon: '🌦️', desc: 'Llovizna',     color: 'var(--rain)' };
+      if ([61,63,65,80,81,82].includes(code))return { icon: '🌧️', desc: 'Lluvia',       color: 'var(--rain)' };
+      if ([71,73,75,77,85,86].includes(code))return { icon: '❄️',  desc: 'Nieve',        color: '#a0c4ff' };
+      if ([95,96,99].includes(code))         return { icon: '⛈️', desc: 'Tormenta',     color: 'var(--rain)' };
+      return { icon: '🌡️', desc: 'Variable', color: 'var(--text)' };
+    }
+
+    function dayLabel(isoDate, index) {
+      if (index === 0) return 'HOY';
+      if (index === 1) return 'MAÑANA';
+      const d = new Date(isoDate + 'T12:00:00');
+      return DIAS[d.getDay()].toUpperCase().substring(0,3);
+    }
+
+    function renderWeather(days) {
+      const container = document.getElementById('weather');
+      container.innerHTML = days.map((d, i) => {
+        const info = wmoToInfo(d.code);
+        return `
+          <div class="weather-day">
+            <div class="weather-day-name">${dayLabel(d.date, i)}</div>
+            <div class="weather-icon">${info.icon}</div>
+            <div class="weather-temp">
+              <span class="weather-temp-max">${Math.round(d.max)}°</span>
+              <span class="weather-temp-min">${Math.round(d.min)}°</span>
+            </div>
+            <div class="weather-desc">${info.desc}</div>
+          </div>`;
+      }).join('');
+    }
+
+    async function fetchWeather(lat, lon) {
+      try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+                    `&daily=weathercode,temperature_2m_max,temperature_2m_min` +
+                    `&timezone=auto&forecast_days=3`;
+        const res  = await fetch(url);
+        const json = await res.json();
+        const days = json.daily.time.map((date, i) => ({
+          date,
+          code: json.daily.weathercode[i],
+          max:  json.daily.temperature_2m_max[i],
+          min:  json.daily.temperature_2m_min[i],
+        }));
+        renderWeather(days);
+      } catch {
+        document.getElementById('weather').innerHTML =
+          '<div class="weather-loading">Clima no disponible</div>';
+      }
+    }
+
+    function initWeather() {
+      fetchWeather(-38.9335, -67.9948); // Cipolletti, Río Negro
+    }
+
+    initWeather();
+    setInterval(initWeather, WEATHER_INTERVAL);
+
+    /* ═══════════════════════════════════════
+       CONTADOR — Supabase
+    ═══════════════════════════════════════ */
     const { createClient } = supabase;
     const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const counterEl    = document.getElementById("counter");
-    const dotEl        = document.getElementById("dot");
-    const statusEl     = document.getElementById("status-text");
-    const lastOrderEl  = document.getElementById("last-order");
-    const flashEl      = document.getElementById("flash");
+    const counterEl   = document.getElementById('counter');
+    const dotEl       = document.getElementById('dot');
+    const statusEl    = document.getElementById('status-text');
+    const lastOrderEl = document.getElementById('last-order');
+    const flashEl     = document.getElementById('flash');
 
-    let count = 0;
+    let count         = 0;
+    let pollingTimer  = null;
+    let realtimeOk    = false;
+    let activeChannel = null;
 
     function setStatus(live, text) {
-      dotEl.className = "dot" + (live ? " live" : "");
-      statusEl.textContent = text;
+      dotEl.className       = 'dot' + (live ? ' live' : '');
+      statusEl.textContent  = text;
     }
 
     function bump(newCount, orderNumber) {
       count = newCount;
-      counterEl.textContent = SALES_OFFSET + count;
-      counterEl.classList.add("bump");
-      setTimeout(() => counterEl.classList.remove("bump"), 200);
-
-      // flash
-      flashEl.classList.add("show");
-      setTimeout(() => flashEl.classList.remove("show"), 300);
-
-      if (orderNumber) {
-        lastOrderEl.textContent = `Última orden: #${orderNumber}`;
-      }
+      counterEl.textContent = (SALES_OFFSET + count).toLocaleString('es-AR');
+      counterEl.classList.add('bump');
+      setTimeout(() => counterEl.classList.remove('bump'), 200);
+      flashEl.classList.add('show');
+      setTimeout(() => flashEl.classList.remove('show'), 300);
+      if (orderNumber) lastOrderEl.textContent = `Última orden · #${orderNumber}`;
     }
 
     async function loadCount() {
       const { count: total, error } = await db
-        .from("ventas")
-        .select("*", { count: "exact", head: true });
+        .from('ventas')
+        .select('*', { count: 'exact', head: true });
+      if (error) { setStatus(false, 'Error al cargar'); return; }
 
-      if (error) {
-        setStatus(false, "Error al cargar");
-        return;
-      }
       count = total ?? 0;
-      counterEl.textContent = SALES_OFFSET + count;
+      counterEl.textContent = (SALES_OFFSET + count).toLocaleString('es-AR');
 
-      // fetch last order_number
       const { data } = await db
-        .from("ventas")
-        .select("order_number")
-        .order("created_at", { ascending: false })
+        .from('ventas')
+        .select('order_number')
+        .order('created_at', { ascending: false })
         .limit(1);
-      if (data?.[0]) lastOrderEl.textContent = `Última orden: #${data[0].order_number}`;
+      if (data?.[0]) lastOrderEl.textContent = `Última orden · #${data[0].order_number}`;
+    }
+
+    async function pollOnce() {
+      const { count: total, error } = await db
+        .from('ventas').select('*', { count: 'exact', head: true });
+      if (error) return;
+      const { data } = await db
+        .from('ventas').select('order_number')
+        .order('created_at', { ascending: false }).limit(1);
+      const newCount = total ?? 0;
+      if (newCount !== count) {
+        bump(newCount, data?.[0]?.order_number);
+      } else {
+        count = newCount;
+        counterEl.textContent = (SALES_OFFSET + count).toLocaleString('es-AR');
+        if (data?.[0]) lastOrderEl.textContent = `Última orden · #${data[0].order_number}`;
+      }
+    }
+
+    function startPolling() {
+      if (pollingTimer) return;
+      setStatus(false, 'Polling cada 30 s');
+      pollOnce();
+      pollingTimer = setInterval(pollOnce, POLL_INTERVAL);
+    }
+
+    function stopPolling() {
+      if (pollingTimer) { clearInterval(pollingTimer); pollingTimer = null; }
     }
 
     async function startRealtime() {
       await loadCount();
 
-      const channel = db.channel("ventas-inserts")
-        .on(
-          "postgres_changes",
-          { event: "INSERT", schema: "public", table: "ventas" },
-          (payload) => {
-            bump(count + 1, payload.new?.order_number);
-          }
+      const fallbackTimer = setTimeout(() => {
+        if (!realtimeOk) {
+          if (activeChannel) { db.removeChannel(activeChannel); activeChannel = null; }
+          startPolling();
+        }
+      }, RT_TIMEOUT);
+
+      activeChannel = db.channel('ventas-inserts')
+        .on('postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'ventas' },
+          (payload) => bump(count + 1, payload.new?.order_number)
         )
         .subscribe((status) => {
-          if (status === "SUBSCRIBED") {
-            setStatus(true, "En vivo");
-          } else if (status === "CLOSED" || status === "CHANNEL_ERROR") {
-            setStatus(false, "Reconectando…");
-            setTimeout(startRealtime, 5000);
+          if (status === 'SUBSCRIBED') {
+            realtimeOk = true;
+            clearTimeout(fallbackTimer);
+            stopPolling();
+            setStatus(true, 'En vivo');
+          } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+            realtimeOk = false;
+            setStatus(false, 'Reconectando…');
+            setTimeout(() => { activeChannel = null; startRealtime(); }, 5000);
           }
         });
     }
