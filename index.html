@@ -140,6 +140,8 @@
   <script>
     const SUPABASE_URL = "https://vvcthfxbksbmzjztkymo.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2Y3RoZnhia3NibXpqenRreW1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3ODc3MzgsImV4cCI6MjEwMTM2MzczOH0.e_rBWBTJutKHmmKssuMPLJuj-jof7JeHvLgvkM-ziX8";
+    // Ventas registradas antes de conectar Empretienda
+    const SALES_OFFSET = 1571;
 
     const { createClient } = supabase;
     const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -159,7 +161,7 @@
 
     function bump(newCount, orderNumber) {
       count = newCount;
-      counterEl.textContent = count;
+      counterEl.textContent = SALES_OFFSET + count;
       counterEl.classList.add("bump");
       setTimeout(() => counterEl.classList.remove("bump"), 200);
 
@@ -182,7 +184,7 @@
         return;
       }
       count = total ?? 0;
-      counterEl.textContent = count;
+      counterEl.textContent = SALES_OFFSET + count;
 
       // fetch last order_number
       const { data } = await db
