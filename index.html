@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ventas · Kiosk</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0d;
+      --surface: #161616;
+      --accent: #22c55e;
+      --accent-dim: #16a34a;
+      --muted: #6b7280;
+      --text: #f9fafb;
+      --text-sub: #9ca3af;
+      --pulse-ring: rgba(34,197,94,0.35);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      overflow: hidden;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid #222;
+      border-radius: 2rem;
+      padding: 4rem 6rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      min-width: 420px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+    }
+
+    .label {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-sub);
+    }
+
+    .counter-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .counter {
+      font-size: clamp(6rem, 18vw, 12rem);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      color: var(--accent);
+      line-height: 1;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    .counter.bump {
+      transform: scale(1.08);
+      opacity: 0.85;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .dot.live {
+      background: var(--accent);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 var(--pulse-ring); }
+      50%       { box-shadow: 0 0 0 6px transparent; }
+    }
+
+    .last-order {
+      font-size: 0.75rem;
+      color: var(--muted);
+      min-height: 1.1em;
+    }
+
+    /* flash overlay on new sale */
+    .flash {
+      position: fixed;
+      inset: 0;
+      background: var(--accent);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.1s ease;
+      z-index: 10;
+    }
+    .flash.show { opacity: 0.07; }
+  </style>
+</head>
+<body>
+  <div class="flash" id="flash"></div>
+
+  <div class="card">
+    <div class="label">Ventas totales</div>
+
+    <div class="counter-wrap">
+      <div class="counter" id="counter">—</div>
+    </div>
+
+    <div class="last-order" id="last-order"></div>
+
+    <div class="status-row">
+      <div class="dot" id="dot"></div>
+      <span id="status-text">Conectando…</span>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://vvcthfxbksbmzjztkymo.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2Y3RoZnhia3NibXpqenRreW1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3ODc3MzgsImV4cCI6MjEwMTM2MzczOH0.e_rBWBTJutKHmmKssuMPLJuj-jof7JeHvLgvkM-ziX8";
+
+    const { createClient } = supabase;
+    const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const counterEl    = document.getElementById("counter");
+    const dotEl        = document.getElementById("dot");
+    const statusEl     = document.getElementById("status-text");
+    const lastOrderEl  = document.getElementById("last-order");
+    const flashEl      = document.getElementById("flash");
+
+    let count = 0;
+
+    function setStatus(live, text) {
+      dotEl.className = "dot" + (live ? " live" : "");
+      statusEl.textContent = text;
+    }
+
+    function bump(newCount, orderNumber) {
+      count = newCount;
+      counterEl.textContent = count;
+      counterEl.classList.add("bump");
+      setTimeout(() => counterEl.classList.remove("bump"), 200);
+
+      // flash
+      flashEl.classList.add("show");
+      setTimeout(() => flashEl.classList.remove("show"), 300);
+
+      if (orderNumber) {
+        lastOrderEl.textContent = `Última orden: #${orderNumber}`;
+      }
+    }
+
+    async function loadCount() {
+      const { count: total, error } = await db
+        .from("ventas")
+        .select("*", { count: "exact", head: true });
+
+      if (error) {
+        setStatus(false, "Error al cargar");
+        return;
+      }
+      count = total ?? 0;
+      counterEl.textContent = count;
+
+      // fetch last order_number
+      const { data } = await db
+        .from("ventas")
+        .select("order_number")
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (data?.[0]) lastOrderEl.textContent = `Última orden: #${data[0].order_number}`;
+    }
+
+    async function startRealtime() {
+      await loadCount();
+
+      const channel = db.channel("ventas-inserts")
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "ventas" },
+          (payload) => {
+            bump(count + 1, payload.new?.order_number);
+          }
+        )
+        .subscribe((status) => {
+          if (status === "SUBSCRIBED") {
+            setStatus(true, "En vivo");
+          } else if (status === "CLOSED" || status === "CHANNEL_ERROR") {
+            setStatus(false, "Reconectando…");
+            setTimeout(startRealtime, 5000);
+          }
+        });
+    }
+
+    startRealtime();
+  </script>
+</body>
+</html>
