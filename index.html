@@ -9,22 +9,27 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:        #070a0f;
-      --line:      #1a2232;
-      --accent:    #00dfa2;
-      --accent-lo: rgba(0,223,162,0.12);
-      --text:      #c8d6e5;
-      --text-sub:  #4e6278;
-      --text-dim:  #2a3a4e;
-      --sun:       #f5a623;
-      --rain:      #5b9bd5;
-      --pulse-ring: rgba(0,223,162,0.3);
+      --bg:        #19251f;
+      --card:      #21302a;
+      --secondary: #2c3f37;
+      --border:    rgba(255,255,255,0.08);
+      --primary:   #4ade80;
+      --primary-lo: rgba(74,222,128,0.18);
+      --primary-glow: rgba(74,222,128,0.22);
+      --fg:        #f0faf4;
+      --muted:     #8aab98;
+      --amber:     #e8a838;
     }
 
     html, body {
       height: 100%;
-      background: var(--bg);
-      color: var(--text);
+      background-color: var(--bg);
+      /* subtle grid overlay */
+      background-image:
+        linear-gradient(to right,  rgba(255,255,255,0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 44px 44px;
+      color: var(--fg);
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       display: flex;
       flex-direction: column;
@@ -32,390 +37,561 @@
       user-select: none;
     }
 
-    /* ── TOP BAR ── */
-    .topbar {
+    /* ── TOP ACCENT LINE ── */
+    .accent-line {
+      position: absolute;
+      inset-inline: 0;
+      top: 0;
+      height: 2px;
+      background: linear-gradient(to right, transparent, var(--primary), transparent);
+      z-index: 5;
+    }
+
+    /* ── HEADER ── */
+    header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 1.4rem 2.4rem;
-      border-bottom: 1px solid var(--line);
+      gap: 1rem;
+      padding: 1.25rem 2.5rem;
+      border-bottom: 1px solid var(--border);
       flex-shrink: 0;
+      animation: rise 0.7s cubic-bezier(0.22,1,0.36,1) both;
     }
 
-    .topbar-date {
-      font-size: 1rem;
-      font-weight: 500;
-      letter-spacing: 0.06em;
+    .date-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
       text-transform: uppercase;
-      color: var(--text-sub);
+      color: var(--muted);
     }
 
-    .topbar-time {
-      font-size: 2.2rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      font-variant-numeric: tabular-nums;
+    .time-display {
+      display: flex;
+      align-items: baseline;
+      gap: 0.1em;
       font-family: 'Courier New', 'Consolas', monospace;
-      color: var(--text);
+      font-variant-numeric: tabular-nums;
       line-height: 1;
     }
 
-    /* ── CENTER (counter) ── */
-    .center {
+    .time-hhmm {
+      font-size: 2.2rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      color: var(--fg);
+    }
+
+    .time-ss {
+      font-size: 1.4rem;
+      font-weight: 500;
+      color: var(--primary);
+    }
+
+    /* ── MAIN / COUNTER ── */
+    main {
       flex: 1;
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 1.2rem;
+      gap: 1rem;
       padding: 2rem;
-      position: relative;
+      text-align: center;
+      overflow: hidden;
     }
 
-    .counter-label {
-      font-size: 0.75rem;
+    /* radial glow */
+    .glow {
+      pointer-events: none;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 80%;
+      max-width: 700px;
+      height: 60%;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(ellipse at center, var(--primary-glow) 0%, transparent 70%);
+      filter: blur(60px);
+      animation: glow-pulse 3.5s ease-in-out infinite;
+      z-index: 0;
+    }
+
+    /* label pill */
+    .label-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.9rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(33,48,42,0.6);
+      backdrop-filter: blur(8px);
+      font-size: 0.68rem;
       font-weight: 700;
-      letter-spacing: 0.3em;
+      letter-spacing: 0.35em;
       text-transform: uppercase;
-      color: var(--text-sub);
+      color: var(--muted);
+      position: relative;
+      z-index: 1;
+      animation: rise 0.7s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    .label-pill svg { color: var(--primary); flex-shrink: 0; }
+
+    /* counter */
+    .counter-wrap {
+      position: relative;
+      z-index: 1;
+      animation: rise 0.7s cubic-bezier(0.22,1,0.36,1) both;
+      animation-delay: 80ms;
     }
 
     .counter {
-      font-size: clamp(7rem, 22vw, 14rem);
-      font-weight: 900;
-      font-stretch: condensed;
+      font-family: 'Courier New', 'Consolas', ui-monospace, monospace;
+      font-size: clamp(6rem, 22vw, 15rem);
+      font-weight: 700;
       font-variant-numeric: tabular-nums;
-      line-height: 0.9;
-      color: var(--accent);
-      transition: transform 0.12s ease, opacity 0.12s ease;
-      /* condensed effect via transform on browsers without font-stretch support */
-      font-family: 'Arial Narrow', 'Helvetica Neue Condensed', 'Segoe UI', Arial, sans-serif;
+      line-height: 0.88;
+      letter-spacing: -0.03em;
+      color: var(--primary);
+      transition: transform 0.12s ease;
+      position: relative;
     }
 
-    .counter.bump {
-      transform: scale(1.06);
-      opacity: 0.8;
-    }
-
-    .last-order {
-      font-size: 0.85rem;
-      letter-spacing: 0.12em;
-      color: var(--text-sub);
-      text-transform: uppercase;
-      min-height: 1.2em;
-    }
-
-    .status-row {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.72rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      margin-top: 0.4rem;
-    }
-
-    .dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--text-dim);
-      flex-shrink: 0;
-    }
-
-    .dot.live {
-      background: var(--accent);
-      animation: pulse 2.5s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 0 0 var(--pulse-ring); }
-      50%       { box-shadow: 0 0 0 5px transparent; }
-    }
-
-    /* flash overlay */
-    .flash {
-      position: fixed;
+    /* sheen sweep */
+    .counter::after {
+      content: attr(data-val);
+      position: absolute;
       inset: 0;
-      background: var(--accent);
-      opacity: 0;
+      background: linear-gradient(
+        110deg,
+        transparent 30%,
+        rgba(74,222,128,0.5) 50%,
+        transparent 70%
+      );
+      background-size: 200% 100%;
+      animation: sweep 6s linear infinite;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
       pointer-events: none;
-      transition: opacity 0.08s ease;
-      z-index: 10;
-    }
-    .flash.show { opacity: 0.06; }
-
-    /* ── WEATHER STRIP ── */
-    .weather {
-      border-top: 1px solid var(--line);
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      flex-shrink: 0;
     }
 
-    .weather-day {
+    .counter.bump { transform: scale(1.05); }
+
+    /* badge row */
+    .badge-row {
       display: flex;
-      flex-direction: column;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: center;
-      gap: 0.45rem;
+      gap: 0.6rem;
+      position: relative;
+      z-index: 1;
+      animation: rise 0.7s cubic-bezier(0.22,1,0.36,1) both;
+      animation-delay: 160ms;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background: rgba(33,48,42,0.6);
+      backdrop-filter: blur(8px);
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .badge svg { flex-shrink: 0; }
+
+    .badge-order strong {
+      font-family: 'Courier New', monospace;
+      font-weight: 700;
+      color: var(--fg);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .badge-live .live-dot-wrap {
+      position: relative;
+      display: inline-flex;
+      width: 10px;
+      height: 10px;
+    }
+
+    .badge-live .live-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: var(--primary);
+      animation: live-pulse 1.6s ease-in-out infinite;
+    }
+
+    .badge-live .live-dot {
+      position: relative;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--primary);
+    }
+
+    .badge-live .live-text {
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--primary);
+    }
+
+    /* ── WEATHER ── */
+    footer {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+      animation: rise 0.7s cubic-bezier(0.22,1,0.36,1) both;
+      animation-delay: 240ms;
+    }
+
+    .weather-col {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
       padding: 1.4rem 1rem;
       position: relative;
     }
 
-    .weather-day + .weather-day::before {
+    .weather-col + .weather-col::before {
       content: '';
       position: absolute;
-      left: 0;
-      top: 20%;
-      height: 60%;
+      left: 0; top: 15%; height: 70%;
       width: 1px;
-      background: var(--line);
+      background: var(--border);
     }
+
+    .weather-icon-box {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 0.75rem;
+      background: var(--secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .weather-info { display: flex; flex-direction: column; gap: 0.15rem; }
 
     .weather-day-name {
-      font-size: 0.65rem;
+      font-size: 0.62rem;
       font-weight: 700;
-      letter-spacing: 0.28em;
+      letter-spacing: 0.25em;
       text-transform: uppercase;
-      color: var(--text-sub);
+      color: var(--muted);
     }
 
-    .weather-icon {
-      font-size: 2rem;
-      line-height: 1;
-    }
-
-    .weather-temp {
+    .weather-temps {
       display: flex;
-      gap: 0.7rem;
       align-items: baseline;
+      gap: 0.4rem;
+      font-family: 'Courier New', monospace;
       font-variant-numeric: tabular-nums;
     }
 
-    .weather-temp-max {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .weather-temp-min {
-      font-size: 1rem;
-      font-weight: 400;
-      color: var(--text-sub);
-    }
+    .temp-max { font-size: 1.6rem; font-weight: 700; color: var(--fg); }
+    .temp-min { font-size: 0.9rem; color: var(--muted); }
 
     .weather-desc {
       font-size: 0.68rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-sub);
+      color: var(--muted);
+      text-transform: capitalize;
     }
 
-    /* loading state */
     .weather-loading {
-      grid-column: 1 / -1;
+      grid-column: 1/-1;
       text-align: center;
       padding: 1.8rem;
       font-size: 0.7rem;
-      letter-spacing: 0.2em;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: var(--text-dim);
+      color: var(--muted);
+      opacity: 0.5;
+    }
+
+    /* flash */
+    .flash {
+      position: fixed; inset: 0;
+      background: var(--primary);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.08s ease;
+      z-index: 20;
+    }
+    .flash.show { opacity: 0.05; }
+
+    /* ── ANIMATIONS ── */
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes glow-pulse {
+      0%, 100% { opacity: 0.55; }
+      50%       { opacity: 0.9; }
+    }
+
+    @keyframes sweep {
+      from { background-position: -200% 0; }
+      to   { background-position:  200% 0; }
+    }
+
+    @keyframes live-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.3; transform: scale(0.8); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
     }
   </style>
 </head>
 <body>
+
+  <div class="accent-line" aria-hidden="true"></div>
   <div class="flash" id="flash"></div>
 
-  <!-- TOP BAR -->
-  <header class="topbar">
-    <div class="topbar-date" id="clock-date">—</div>
-    <div class="topbar-time" id="clock-time">--:--:--</div>
+  <!-- HEADER -->
+  <header>
+    <div class="date-label" id="clock-date">&nbsp;</div>
+    <div class="time-display">
+      <span class="time-hhmm" id="clock-hhmm">--:--</span><span class="time-ss" id="clock-ss">--</span>
+    </div>
   </header>
 
   <!-- COUNTER -->
-  <main class="center">
-    <div class="counter-label">Ventas totales</div>
-    <div class="counter" id="counter">—</div>
-    <div class="last-order" id="last-order"></div>
-    <div class="status-row">
-      <div class="dot" id="dot"></div>
-      <span id="status-text">Conectando…</span>
+  <main>
+    <div class="glow" aria-hidden="true"></div>
+
+    <div class="label-pill">
+      <!-- arrow-up-right icon -->
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+      Ventas totales
+    </div>
+
+    <div class="counter-wrap">
+      <div class="counter" id="counter" data-val="0" aria-live="polite" aria-label="Ventas totales">0</div>
+    </div>
+
+    <div class="badge-row">
+      <span class="badge badge-order" id="badge-order" style="display:none">
+        <!-- receipt icon -->
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8H8"/><path d="M16 12H8"/><path d="M12 16H8"/></svg>
+        Última orden <strong id="last-order-num">#—</strong>
+      </span>
+
+      <span class="badge badge-live" id="badge-status">
+        <span class="live-dot-wrap" aria-hidden="true">
+          <span class="live-ring" id="live-ring"></span>
+          <span class="live-dot"></span>
+        </span>
+        <span class="live-text" id="status-text">Conectando</span>
+      </span>
     </div>
   </main>
 
   <!-- WEATHER -->
-  <footer class="weather" id="weather">
-    <div class="weather-loading" id="weather-loading">Cargando clima…</div>
+  <footer id="weather">
+    <div class="weather-loading">Cargando clima…</div>
   </footer>
 
   <script>
-    /* ═══════════════════════════════════════
-       CONFIGURACIÓN
-    ═══════════════════════════════════════ */
+    /* ═══════════════════════════
+       CONFIG
+    ═══════════════════════════ */
     const SUPABASE_URL      = "https://vvcthfxbksbmzjztkymo.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2Y3RoZnhia3NibXpqenRreW1vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3ODc3MzgsImV4cCI6MjEwMTM2MzczOH0.e_rBWBTJutKHmmKssuMPLJuj-jof7JeHvLgvkM-ziX8";
-    const SALES_OFFSET      = 1571;   // ventas previas a Empretienda
-    const POLL_INTERVAL     = 30_000; // ms entre polls (fallback)
-    const RT_TIMEOUT        = 10_000; // ms antes de caer a polling
-    const WEATHER_INTERVAL  = 30 * 60 * 1000; // refrescar clima cada 30 min
+    const SALES_OFFSET      = 1571;
+    const POLL_INTERVAL     = 30_000;
+    const RT_TIMEOUT        = 10_000;
+    const WEATHER_REFRESH   = 30 * 60 * 1000;
+    // Cipolletti, Río Negro
+    const LAT = -38.9335, LON = -67.9948;
 
-    /* ═══════════════════════════════════════
+    /* ═══════════════════════════
        RELOJ
-    ═══════════════════════════════════════ */
-    const DIAS   = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-    const MESES  = ['enero','febrero','marzo','abril','mayo','junio',
-                    'julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    ═══════════════════════════ */
+    const DIAS  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    const MESES = ['enero','febrero','marzo','abril','mayo','junio',
+                   'julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+    const elDate = document.getElementById('clock-date');
+    const elHHMM = document.getElementById('clock-hhmm');
+    const elSS   = document.getElementById('clock-ss');
 
     function tickClock() {
-      const now  = new Date();
-      const hh   = String(now.getHours()).padStart(2,'0');
-      const mm   = String(now.getMinutes()).padStart(2,'0');
-      const ss   = String(now.getSeconds()).padStart(2,'0');
-      document.getElementById('clock-time').textContent = `${hh}:${mm}:${ss}`;
-      document.getElementById('clock-date').textContent =
-        `${DIAS[now.getDay()]}, ${now.getDate()} de ${MESES[now.getMonth()]}`;
+      const n = new Date();
+      elDate.textContent = `${DIAS[n.getDay()]}, ${n.getDate()} de ${MESES[n.getMonth()]}`;
+      elHHMM.textContent = `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
+      elSS.textContent   = String(n.getSeconds()).padStart(2,'0');
     }
     tickClock();
     setInterval(tickClock, 1000);
 
-    /* ═══════════════════════════════════════
-       CLIMA — Open-Meteo (sin API key)
-    ═══════════════════════════════════════ */
-    function wmoToInfo(code) {
-      if (code === 0)                        return { icon: '☀️',  desc: 'Despejado',   color: 'var(--sun)' };
-      if (code === 1)                        return { icon: '🌤️', desc: 'Casi despej.', color: 'var(--sun)' };
-      if (code === 2)                        return { icon: '⛅',  desc: 'Parcial',      color: 'var(--text)' };
-      if (code === 3)                        return { icon: '☁️',  desc: 'Nublado',      color: 'var(--text-sub)' };
-      if ([45,48].includes(code))            return { icon: '🌫️', desc: 'Niebla',       color: 'var(--text-sub)' };
-      if ([51,53,55].includes(code))         return { icon: '🌦️', desc: 'Llovizna',     color: 'var(--rain)' };
-      if ([61,63,65,80,81,82].includes(code))return { icon: '🌧️', desc: 'Lluvia',       color: 'var(--rain)' };
-      if ([71,73,75,77,85,86].includes(code))return { icon: '❄️',  desc: 'Nieve',        color: '#a0c4ff' };
-      if ([95,96,99].includes(code))         return { icon: '⛈️', desc: 'Tormenta',     color: 'var(--rain)' };
-      return { icon: '🌡️', desc: 'Variable', color: 'var(--text)' };
+    /* ═══════════════════════════
+       CLIMA — Open-Meteo
+    ═══════════════════════════ */
+    function wmoIcon(code) {
+      if (code === 0)                               return '☀️';
+      if (code === 1)                               return '🌤️';
+      if (code === 2)                               return '⛅';
+      if (code === 3)                               return '☁️';
+      if ([45,48].includes(code))                   return '🌫️';
+      if ([51,53,55].includes(code))                return '🌦️';
+      if ([61,63,65,80,81,82].includes(code))       return '🌧️';
+      if ([71,73,75,77,85,86].includes(code))       return '❄️';
+      if ([95,96,99].includes(code))                return '⛈️';
+      return '🌡️';
     }
 
-    function dayLabel(isoDate, index) {
-      if (index === 0) return 'HOY';
-      if (index === 1) return 'MAÑANA';
+    function wmoDesc(code) {
+      if (code === 0)                               return 'Despejado';
+      if (code === 1)                               return 'Casi despejado';
+      if (code === 2)                               return 'Parcialmente nublado';
+      if (code === 3)                               return 'Nublado';
+      if ([45,48].includes(code))                   return 'Niebla';
+      if ([51,53,55].includes(code))                return 'Llovizna';
+      if ([61,63,65,80,81,82].includes(code))       return 'Lluvia';
+      if ([71,73,75,77,85,86].includes(code))       return 'Nieve';
+      if ([95,96,99].includes(code))                return 'Tormenta';
+      return 'Variable';
+    }
+
+    function dayLabel(isoDate, i) {
+      if (i === 0) return 'HOY';
+      if (i === 1) return 'MAÑANA';
       const d = new Date(isoDate + 'T12:00:00');
-      return DIAS[d.getDay()].toUpperCase().substring(0,3);
+      return DIAS[d.getDay()].substring(0,3).toUpperCase();
     }
 
-    function renderWeather(days) {
-      const container = document.getElementById('weather');
-      container.innerHTML = days.map((d, i) => {
-        const info = wmoToInfo(d.code);
-        return `
-          <div class="weather-day">
-            <div class="weather-day-name">${dayLabel(d.date, i)}</div>
-            <div class="weather-icon">${info.icon}</div>
-            <div class="weather-temp">
-              <span class="weather-temp-max">${Math.round(d.max)}°</span>
-              <span class="weather-temp-min">${Math.round(d.min)}°</span>
-            </div>
-            <div class="weather-desc">${info.desc}</div>
-          </div>`;
-      }).join('');
-    }
-
-    async function fetchWeather(lat, lon) {
+    async function fetchWeather() {
       try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
-                    `&daily=weathercode,temperature_2m_max,temperature_2m_min` +
-                    `&timezone=auto&forecast_days=3`;
-        const res  = await fetch(url);
-        const json = await res.json();
-        const days = json.daily.time.map((date, i) => ({
-          date,
-          code: json.daily.weathercode[i],
-          max:  json.daily.temperature_2m_max[i],
-          min:  json.daily.temperature_2m_min[i],
-        }));
-        renderWeather(days);
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}` +
+          `&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=America%2FArgentina%2FSalta&forecast_days=3`;
+        const json = await (await fetch(url)).json();
+        const cols = json.daily.time.map((date, i) => `
+          <div class="weather-col">
+            <div class="weather-icon-box">${wmoIcon(json.daily.weathercode[i])}</div>
+            <div class="weather-info">
+              <div class="weather-day-name">${dayLabel(date, i)}</div>
+              <div class="weather-temps">
+                <span class="temp-max">${Math.round(json.daily.temperature_2m_max[i])}°</span>
+                <span class="temp-min">${Math.round(json.daily.temperature_2m_min[i])}°</span>
+              </div>
+              <div class="weather-desc">${wmoDesc(json.daily.weathercode[i])}</div>
+            </div>
+          </div>`).join('');
+        document.getElementById('weather').innerHTML = cols;
       } catch {
         document.getElementById('weather').innerHTML =
           '<div class="weather-loading">Clima no disponible</div>';
       }
     }
 
-    function initWeather() {
-      fetchWeather(-38.9335, -67.9948); // Cipolletti, Río Negro
-    }
+    fetchWeather();
+    setInterval(fetchWeather, WEATHER_REFRESH);
 
-    initWeather();
-    setInterval(initWeather, WEATHER_INTERVAL);
-
-    /* ═══════════════════════════════════════
+    /* ═══════════════════════════
        CONTADOR — Supabase
-    ═══════════════════════════════════════ */
+    ═══════════════════════════ */
     const { createClient } = supabase;
     const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const counterEl   = document.getElementById('counter');
-    const dotEl       = document.getElementById('dot');
+    const badgeOrder  = document.getElementById('badge-order');
+    const lastOrderEl = document.getElementById('last-order-num');
     const statusEl    = document.getElementById('status-text');
-    const lastOrderEl = document.getElementById('last-order');
+    const liveRing    = document.getElementById('live-ring');
     const flashEl     = document.getElementById('flash');
 
-    let count         = 0;
-    let pollingTimer  = null;
-    let realtimeOk    = false;
-    let activeChannel = null;
+    let count = 0, pollingTimer = null, realtimeOk = false, activeChannel = null;
 
-    function setStatus(live, text) {
-      dotEl.className       = 'dot' + (live ? ' live' : '');
-      statusEl.textContent  = text;
+    // count-up animation
+    function animateTo(target, fromVal) {
+      const duration = 1400;
+      const start = performance.now();
+      const from  = fromVal;
+      function tick(t) {
+        const p = Math.min((t - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - p, 3);
+        const val = Math.round(from + (target - from) * eased);
+        const display = val.toLocaleString('es-AR');
+        counterEl.textContent = display;
+        counterEl.dataset.val = display;
+        if (p < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    function setDisplay(newCount, orderNumber, animate = false) {
+      const display = (SALES_OFFSET + newCount).toLocaleString('es-AR');
+      if (animate) {
+        animateTo(SALES_OFFSET + newCount, SALES_OFFSET + count);
+      } else {
+        counterEl.textContent = display;
+        counterEl.dataset.val = display;
+      }
+      count = newCount;
+      if (orderNumber) {
+        lastOrderEl.textContent = `#${orderNumber}`;
+        badgeOrder.style.display = '';
+      }
     }
 
     function bump(newCount, orderNumber) {
-      count = newCount;
-      counterEl.textContent = (SALES_OFFSET + count).toLocaleString('es-AR');
       counterEl.classList.add('bump');
       setTimeout(() => counterEl.classList.remove('bump'), 200);
       flashEl.classList.add('show');
-      setTimeout(() => flashEl.classList.remove('show'), 300);
-      if (orderNumber) lastOrderEl.textContent = `Última orden · #${orderNumber}`;
+      setTimeout(() => flashEl.classList.remove('show'), 350);
+      setDisplay(newCount, orderNumber, true);
+    }
+
+    function setStatus(live, text) {
+      liveRing.style.background   = live ? 'var(--primary)' : 'var(--muted)';
+      liveRing.style.animation    = live ? '' : 'none';
+      statusEl.style.color        = live ? 'var(--primary)' : 'var(--muted)';
+      statusEl.textContent        = text;
     }
 
     async function loadCount() {
       const { count: total, error } = await db
-        .from('ventas')
-        .select('*', { count: 'exact', head: true });
-      if (error) { setStatus(false, 'Error al cargar'); return; }
+        .from('ventas').select('*', { count: 'exact', head: true });
+      if (error) { setStatus(false, 'Error'); return; }
 
-      count = total ?? 0;
-      counterEl.textContent = (SALES_OFFSET + count).toLocaleString('es-AR');
+      const { data } = await db.from('ventas').select('order_number')
+        .order('created_at', { ascending: false }).limit(1);
 
-      const { data } = await db
-        .from('ventas')
-        .select('order_number')
-        .order('created_at', { ascending: false })
-        .limit(1);
-      if (data?.[0]) lastOrderEl.textContent = `Última orden · #${data[0].order_number}`;
+      setDisplay(total ?? 0, data?.[0]?.order_number, true);
     }
 
     async function pollOnce() {
-      const { count: total, error } = await db
+      const { count: total } = await db
         .from('ventas').select('*', { count: 'exact', head: true });
-      if (error) return;
-      const { data } = await db
-        .from('ventas').select('order_number')
+      const { data } = await db.from('ventas').select('order_number')
         .order('created_at', { ascending: false }).limit(1);
-      const newCount = total ?? 0;
-      if (newCount !== count) {
-        bump(newCount, data?.[0]?.order_number);
-      } else {
-        count = newCount;
-        counterEl.textContent = (SALES_OFFSET + count).toLocaleString('es-AR');
-        if (data?.[0]) lastOrderEl.textContent = `Última orden · #${data[0].order_number}`;
-      }
+      const n = total ?? 0;
+      if (n !== count) bump(n, data?.[0]?.order_number);
+      else setDisplay(n, data?.[0]?.order_number);
     }
 
     function startPolling() {
       if (pollingTimer) return;
-      setStatus(false, 'Polling cada 30 s');
+      setStatus(false, 'Polling 30 s');
       pollOnce();
       pollingTimer = setInterval(pollOnce, POLL_INTERVAL);
     }
@@ -426,8 +602,7 @@
 
     async function startRealtime() {
       await loadCount();
-
-      const fallbackTimer = setTimeout(() => {
+      const fb = setTimeout(() => {
         if (!realtimeOk) {
           if (activeChannel) { db.removeChannel(activeChannel); activeChannel = null; }
           startPolling();
@@ -437,15 +612,13 @@
       activeChannel = db.channel('ventas-inserts')
         .on('postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'ventas' },
-          (payload) => bump(count + 1, payload.new?.order_number)
+          p => bump(count + 1, p.new?.order_number)
         )
-        .subscribe((status) => {
-          if (status === 'SUBSCRIBED') {
-            realtimeOk = true;
-            clearTimeout(fallbackTimer);
-            stopPolling();
+        .subscribe(s => {
+          if (s === 'SUBSCRIBED') {
+            realtimeOk = true; clearTimeout(fb); stopPolling();
             setStatus(true, 'En vivo');
-          } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+          } else if (s === 'CLOSED' || s === 'CHANNEL_ERROR') {
             realtimeOk = false;
             setStatus(false, 'Reconectando…');
             setTimeout(() => { activeChannel = null; startRealtime(); }, 5000);
